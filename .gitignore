@@ -58,6 +58,9 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 #testing
 /test/auth.e2e-spec.ts
 /src/auth/auth.service.spec.ts
+/src/customers/customers.service.spec.ts
 
 #db
 /src/db/seed.ts
+
+/test
