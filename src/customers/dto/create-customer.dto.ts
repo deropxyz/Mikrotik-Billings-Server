@@ -36,4 +36,8 @@ export class CreateCustomerDto {
   @IsString({ message: 'PPPoE username harus berupa string' })
   @IsOptional()
   pppoeUsername?: string;
+
+  @IsString({ message: 'PPPoE password harus berupa string' })
+  @IsOptional()
+  pppoePassword?: string;
 }

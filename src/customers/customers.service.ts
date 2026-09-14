@@ -5,13 +5,14 @@ import {
   ConflictException,
   Logger,
 } from '@nestjs/common';
-import { eq, and, or, ilike, count } from 'drizzle-orm';
+import { eq, ne, and, or, ilike, count } from 'drizzle-orm';
 import { DRIZZLE_TOKEN } from '../db/db.module.js';
 import { customers, packages, routers, pppoeAccounts } from '../db/schema.js';
 import type { Database } from '../db/index.js';
 import type { CreateCustomerDto } from './dto/create-customer.dto.js';
 import type { UpdateCustomerDto } from './dto/update-customer.dto.js';
 import type { SearchCustomerDto } from './dto/search-customer.dto.js';
+import type { UpdatePppoeAccountDto } from './dto/update-pppoe-account.dto.js';
 import { PaginatedResponseDto } from '../common/dto/index.js';
 
 @Injectable()
@@ -81,6 +82,7 @@ export class CustomersService {
       .insert(pppoeAccounts)
       .values({
         username: pppoeUsername,
+        secretRef: dto.pppoePassword ?? null,
         customerId: customer!.id,
       })
       .returning();
@@ -111,6 +113,7 @@ export class CustomersService {
           ilike(customers.name, searchPattern),
           ilike(customers.phone, searchPattern),
           ilike(customers.address, searchPattern),
+          ilike(customers.zone, searchPattern),
         ),
       );
     }
@@ -129,6 +132,10 @@ export class CustomersService {
 
     if (query.packageId) {
       conditions.push(eq(customers.packageId, query.packageId));
+    }
+
+    if (query.routerId) {
+      conditions.push(eq(customers.routerId, query.routerId));
     }
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
@@ -264,6 +271,132 @@ export class CustomersService {
     this.logger.log(`Customer deactivated: ${id}`);
 
     return deactivated;
+  }
+
+  /**
+   * Dapatkan akun PPPoE berdasarkan customer ID.
+   */
+  async getPppoeAccount(customerId: string) {
+    const [pppoe] = await this.db
+      .select()
+      .from(pppoeAccounts)
+      .where(eq(pppoeAccounts.customerId, customerId))
+      .limit(1);
+
+    if (!pppoe) {
+      throw new NotFoundException(`Akun PPPoE untuk pelanggan "${customerId}" tidak ditemukan`);
+    }
+
+    return pppoe;
+  }
+
+  /**
+   * Update data akun PPPoE (username, password/secretRef, isEnabled).
+   */
+  async updatePppoeAccount(customerId: string, dto: UpdatePppoeAccountDto) {
+    const [existing] = await this.db
+      .select()
+      .from(pppoeAccounts)
+      .where(eq(pppoeAccounts.customerId, customerId))
+      .limit(1);
+
+    if (!existing) {
+      throw new NotFoundException(`Akun PPPoE untuk pelanggan "${customerId}" tidak ditemukan`);
+    }
+
+    if (dto.username && dto.username !== existing.username) {
+      const [duplicate] = await this.db
+        .select()
+        .from(pppoeAccounts)
+        .where(
+          and(
+            eq(pppoeAccounts.username, dto.username),
+            ne(pppoeAccounts.id, existing.id),
+          ),
+        )
+        .limit(1);
+
+      if (duplicate) {
+        throw new ConflictException(`Username PPPoE "${dto.username}" sudah digunakan`);
+      }
+    }
+
+    const updateData: Partial<typeof pppoeAccounts.$inferInsert> = {
+      updatedAt: new Date(),
+    };
+
+    if (dto.username !== undefined) {
+      updateData.username = dto.username;
+    }
+    if (dto.password !== undefined) {
+      updateData.secretRef = dto.password;
+    }
+    if (dto.isEnabled !== undefined) {
+      updateData.isEnabled = dto.isEnabled;
+    }
+
+    const [updated] = await this.db
+      .update(pppoeAccounts)
+      .set(updateData)
+      .where(eq(pppoeAccounts.id, existing.id))
+      .returning();
+
+    this.logger.log(`PPPoE account updated for customer: ${customerId}`);
+    return updated;
+  }
+
+  /**
+   * Aktifkan akun PPPoE pelanggan.
+   */
+  async enablePppoe(customerId: string) {
+    const [existing] = await this.db
+      .select()
+      .from(pppoeAccounts)
+      .where(eq(pppoeAccounts.customerId, customerId))
+      .limit(1);
+
+    if (!existing) {
+      throw new NotFoundException(`Akun PPPoE untuk pelanggan "${customerId}" tidak ditemukan`);
+    }
+
+    const [updated] = await this.db
+      .update(pppoeAccounts)
+      .set({
+        isEnabled: true,
+        updatedAt: new Date(),
+      })
+      .where(eq(pppoeAccounts.id, existing.id))
+      .returning();
+
+    this.logger.log(`PPPoE account enabled for customer: ${customerId}`);
+    return updated;
+  }
+
+  /**
+   * Nonaktifkan akun PPPoE pelanggan.
+   */
+  async disablePppoe(customerId: string) {
+    const [existing] = await this.db
+      .select()
+      .from(pppoeAccounts)
+      .where(eq(pppoeAccounts.customerId, customerId))
+      .limit(1);
+
+    if (!existing) {
+      throw new NotFoundException(`Akun PPPoE untuk pelanggan "${customerId}" tidak ditemukan`);
+    }
+
+    const [updated] = await this.db
+      .update(pppoeAccounts)
+      .set({
+        isEnabled: false,
+        updatedAt: new Date(),
+      })
+      .where(eq(pppoeAccounts.id, existing.id))
+      .returning();
+
+    this.logger.log(`PPPoE account disabled for customer: ${customerId}`);
+    return updated;
   }
 
   /**
