@@ -1,0 +1,36 @@
+import {
+  IsString,
+  IsOptional,
+  IsInt,
+  IsPositive,
+  IsNumber,
+  Min,
+  MinLength,
+  MaxLength,
+  IsBoolean,
+} from 'class-validator';
+import { Type } from 'class-transformer';
+
+export class UpdatePackageDto {
+  @IsString({ message: 'Nama harus berupa string' })
+  @IsOptional()
+  @MinLength(2, { message: 'Nama minimal 2 karakter' })
+  @MaxLength(100, { message: 'Nama maksimal 100 karakter' })
+  name?: string;
+
+  @IsInt({ message: 'Speed harus berupa bilangan bulat' })
+  @IsPositive({ message: 'Speed harus lebih besar dari 0' })
+  @IsOptional()
+  @Type(() => Number)
+  speedMbps?: number;
+
+  @IsNumber({}, { message: 'Harga bulanan harus berupa angka' })
+  @Min(0, { message: 'Harga bulanan tidak boleh negatif' })
+  @IsOptional()
+  @Type(() => Number)
+  monthlyPrice?: number;
+
+  @IsBoolean({ message: 'isActive harus berupa boolean' })
+  @IsOptional()
+  isActive?: boolean;
+}
