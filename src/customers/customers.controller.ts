@@ -16,6 +16,7 @@ import { CustomersService } from './customers.service.js';
 import { CreateCustomerDto } from './dto/create-customer.dto.js';
 import { UpdateCustomerDto } from './dto/update-customer.dto.js';
 import { SearchCustomerDto } from './dto/search-customer.dto.js';
+import { UpdatePppoeAccountDto } from './dto/update-pppoe-account.dto.js';
 
 @Controller('customers')
 export class CustomersController {
@@ -66,5 +67,46 @@ export class CustomersController {
   @Delete(':id')
   async deactivate(@Param('id') id: string) {
     return this.customersService.deactivate(id);
+  }
+
+  /**
+   * GET /customers/:id/pppoe
+   * Dapatkan detail akun PPPoE pelanggan.
+   */
+  @Get(':id/pppoe')
+  async getPppoeAccount(@Param('id') id: string) {
+    return this.customersService.getPppoeAccount(id);
+  }
+
+  /**
+   * PATCH /customers/:id/pppoe
+   * Update data akun PPPoE pelanggan (username, password, status).
+   */
+  @Patch(':id/pppoe')
+  async updatePppoeAccount(
+    @Param('id') id: string,
+    @Body() dto: UpdatePppoeAccountDto,
+  ) {
+    return this.customersService.updatePppoeAccount(id, dto);
+  }
+
+  /**
+   * POST /customers/:id/pppoe/enable
+   * Aktifkan akun PPPoE pelanggan.
+   */
+  @Post(':id/pppoe/enable')
+  @HttpCode(HttpStatus.OK)
+  async enablePppoe(@Param('id') id: string) {
+    return this.customersService.enablePppoe(id);
+  }
+
+  /**
+   * POST /customers/:id/pppoe/disable
+   * Nonaktifkan akun PPPoE pelanggan.
+   */
+  @Post(':id/pppoe/disable')
+  @HttpCode(HttpStatus.OK)
+  async disablePppoe(@Param('id') id: string) {
+    return this.customersService.disablePppoe(id);
   }
 }

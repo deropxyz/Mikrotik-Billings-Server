@@ -22,4 +22,8 @@ export class SearchCustomerDto extends PaginationDto {
   @IsOptional()
   @IsString()
   packageId?: string;
+
+  @IsOptional()
+  @IsString()
+  routerId?: string;
 }
