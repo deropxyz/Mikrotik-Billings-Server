@@ -56,11 +56,9 @@ pids
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 #testing
-/test/auth.e2e-spec.ts
-/src/auth/auth.service.spec.ts
-/src/customers/customers.service.spec.ts
+*.spec.ts
+*.e2e-spec.ts
+/test
 
 #db
 /src/db/seed.ts
-
-/test
