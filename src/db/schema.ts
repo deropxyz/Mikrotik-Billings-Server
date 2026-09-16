@@ -62,7 +62,7 @@ export const users = pgTable('User', {
   role: userRoleEnum('role').default('ADMIN').notNull(),
   isActive: boolean('isActive').default(true).notNull(),
   createdAt: timestamp('createdAt', { mode: 'date' }).defaultNow().notNull(),
-  updatedAt: timestamp('updatedAt', { mode: 'date' }).defaultNow().notNull(),
+  updatedAt: timestamp('updatedAt', { mode: 'date' }).defaultNow().$onUpdate(() => new Date()).notNull(),
 });
 
 // ---- Package ----
@@ -73,7 +73,7 @@ export const packages = pgTable('Package', {
   monthlyPrice: decimal('monthlyPrice', { precision: 12, scale: 2 }).notNull(),
   isActive: boolean('isActive').default(true).notNull(),
   createdAt: timestamp('createdAt', { mode: 'date' }).defaultNow().notNull(),
-  updatedAt: timestamp('updatedAt', { mode: 'date' }).defaultNow().notNull(),
+  updatedAt: timestamp('updatedAt', { mode: 'date' }).defaultNow().$onUpdate(() => new Date()).notNull(),
 });
 
 // ---- Router ----
@@ -86,7 +86,7 @@ export const routers = pgTable('Router', {
   apiPort: integer('apiPort').default(8728).notNull(),
   isActive: boolean('isActive').default(true).notNull(),
   createdAt: timestamp('createdAt', { mode: 'date' }).defaultNow().notNull(),
-  updatedAt: timestamp('updatedAt', { mode: 'date' }).defaultNow().notNull(),
+  updatedAt: timestamp('updatedAt', { mode: 'date' }).defaultNow().$onUpdate(() => new Date()).notNull(),
 });
 
 // ---- Customer ----
@@ -107,7 +107,7 @@ export const customers = pgTable(
       .notNull()
       .references(() => routers.id),
     createdAt: timestamp('createdAt', { mode: 'date' }).defaultNow().notNull(),
-    updatedAt: timestamp('updatedAt', { mode: 'date' }).defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt', { mode: 'date' }).defaultNow().$onUpdate(() => new Date()).notNull(),
   },
   (table) => [
     index('Customer_name_idx').on(table.name),
@@ -126,7 +126,7 @@ export const pppoeAccounts = pgTable('PPPoEAccount', {
     .unique()
     .references(() => customers.id, { onDelete: 'cascade' }),
   createdAt: timestamp('createdAt', { mode: 'date' }).defaultNow().notNull(),
-  updatedAt: timestamp('updatedAt', { mode: 'date' }).defaultNow().notNull(),
+  updatedAt: timestamp('updatedAt', { mode: 'date' }).defaultNow().$onUpdate(() => new Date()).notNull(),
 });
 
 // ---- Invoice ----
@@ -144,7 +144,7 @@ export const invoices = pgTable(
     amount: decimal('amount', { precision: 12, scale: 2 }).notNull(),
     status: invoiceStatusEnum('status').default('UNPAID').notNull(),
     createdAt: timestamp('createdAt', { mode: 'date' }).defaultNow().notNull(),
-    updatedAt: timestamp('updatedAt', { mode: 'date' }).defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt', { mode: 'date' }).defaultNow().$onUpdate(() => new Date()).notNull(),
   },
   (table) => [
     index('Invoice_customerId_status_idx').on(table.customerId, table.status),
@@ -191,7 +191,7 @@ export const networkSessions = pgTable(
     disconnectedAt: timestamp('disconnectedAt', { mode: 'date' }),
     lastSeenAt: timestamp('lastSeenAt', { mode: 'date' }),
     createdAt: timestamp('createdAt', { mode: 'date' }).defaultNow().notNull(),
-    updatedAt: timestamp('updatedAt', { mode: 'date' }).defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt', { mode: 'date' }).defaultNow().$onUpdate(() => new Date()).notNull(),
   },
   (table) => [
     index('NetworkSession_customerId_status_idx').on(table.customerId, table.status),
