@@ -5,10 +5,17 @@ import {
   Param,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { NetworkService } from './network.service.js';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
+import { RolesGuard } from '../common/guards/roles.guard.js';
+import { Roles } from '../common/decorators/roles.decorator.js';
 
+// Protected: Requires valid JWT and ADMIN role
 @Controller()
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('ADMIN')
 export class NetworkController {
   constructor(private readonly networkService: NetworkService) {}
 

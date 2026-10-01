@@ -12,6 +12,6 @@ export class PaginationDto {
   @Type(() => Number)
   @IsInt({ message: 'Limit harus berupa angka bulat' })
   @Min(1, { message: 'Limit minimal bernilai 1' })
-  @Max(100, { message: 'Limit maksimal bernilai 100' })
+  @Max(1000, { message: 'Limit maksimal bernilai 1000' })
   limit?: number = 10;
 }

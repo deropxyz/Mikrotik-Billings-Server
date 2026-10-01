@@ -6,11 +6,18 @@ import {
   Param,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { PaymentsService } from './payments.service.js';
 import { RecordPaymentDto } from './dto/record-payment.dto.js';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
+import { RolesGuard } from '../common/guards/roles.guard.js';
+import { Roles } from '../common/decorators/roles.decorator.js';
 
+// Protected: Requires valid JWT and ADMIN role
 @Controller()
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('ADMIN')
 export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 

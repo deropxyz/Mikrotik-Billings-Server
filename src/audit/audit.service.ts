@@ -1,4 +1,4 @@
-import { Injectable, Inject, Logger } from '@nestjs/common';
+import { Injectable, Inject, Logger, NotFoundException } from '@nestjs/common';
 import { eq, and, gte, lte, count, desc } from 'drizzle-orm';
 import { DRIZZLE_TOKEN } from '../db/db.module.js';
 import { auditLogs } from '../db/schema.js';
@@ -75,6 +75,12 @@ export class AuditService {
     if (filter.targetType) {
       conditions.push(eq(auditLogs.targetType, filter.targetType));
     }
+    if (filter.targetId) {
+      conditions.push(eq(auditLogs.targetId, filter.targetId));
+    }
+    if (filter.source) {
+      conditions.push(eq(auditLogs.source, filter.source));
+    }
     if (filter.dateFrom) {
       conditions.push(gte(auditLogs.createdAt, new Date(filter.dateFrom)));
     }
@@ -131,5 +137,47 @@ export class AuditService {
     }
 
     return new PaginatedResponseDto(items, page, limit, totalItems);
+  }
+
+  /**
+   * Mengambil detail log audit berdasarkan ID.
+   */
+  async getAuditLogById(id: string) {
+    let log: any;
+    if (this.db.query?.auditLogs?.findFirst) {
+      log = await this.db.query.auditLogs.findFirst({
+        where: eq(auditLogs.id, id),
+        with: {
+          actor: {
+            columns: {
+              id: true,
+              name: true,
+              email: true,
+              role: true,
+            },
+          },
+          customer: {
+            columns: {
+              id: true,
+              name: true,
+              phone: true,
+            },
+          },
+        },
+      });
+    } else {
+      const [res] = await this.db
+        .select()
+        .from(auditLogs)
+        .where(eq(auditLogs.id, id))
+        .limit(1);
+      log = res;
+    }
+
+    if (!log) {
+      throw new NotFoundException(`Audit log dengan ID "${id}" tidak ditemukan`);
+    }
+
+    return log;
   }
 }

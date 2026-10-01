@@ -9,12 +9,19 @@ import {
   HttpStatus,
   UsePipes,
   ValidationPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { InvoicesService } from './invoices.service.js';
 import { CreateInvoiceDto } from './dto/create-invoice.dto.js';
 import { InvoiceFilterDto } from './dto/invoice-filter.dto.js';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
+import { RolesGuard } from '../common/guards/roles.guard.js';
+import { Roles } from '../common/decorators/roles.decorator.js';
 
+// Protected: Requires valid JWT and ADMIN role
 @Controller(['invoices', 'api/invoices'])
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('ADMIN')
 export class InvoicesController {
   constructor(private readonly invoicesService: InvoicesService) {}
 

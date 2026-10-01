@@ -11,14 +11,21 @@ import {
   HttpStatus,
   UsePipes,
   ValidationPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { CustomersService } from './customers.service.js';
 import { CreateCustomerDto } from './dto/create-customer.dto.js';
 import { UpdateCustomerDto } from './dto/update-customer.dto.js';
 import { SearchCustomerDto } from './dto/search-customer.dto.js';
 import { UpdatePppoeAccountDto } from './dto/update-pppoe-account.dto.js';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
+import { RolesGuard } from '../common/guards/roles.guard.js';
+import { Roles } from '../common/decorators/roles.decorator.js';
 
+// Protected: Requires valid JWT and ADMIN role
 @Controller('customers')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('ADMIN')
 export class CustomersController {
   constructor(private readonly customersService: CustomersService) {}
 

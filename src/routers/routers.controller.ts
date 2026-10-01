@@ -7,11 +7,18 @@ import {
   Param,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { RoutersService } from './routers.service.js';
 import { CreateRouterDto, UpdateRouterDto } from './dto/index.js';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
+import { RolesGuard } from '../common/guards/roles.guard.js';
+import { Roles } from '../common/decorators/roles.decorator.js';
 
+// Protected: Requires valid JWT and ADMIN role
 @Controller('routers')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('ADMIN')
 export class RoutersController {
   constructor(private readonly routersService: RoutersService) {}
 

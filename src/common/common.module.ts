@@ -4,10 +4,13 @@ import { GlobalExceptionFilter } from './filters/index.js';
 import { ResponseInterceptor } from './interceptors/index.js';
 import { AppLoggerService } from './services/index.js';
 
+import { RolesGuard } from './guards/roles.guard.js';
+
 @Global()
 @Module({
   providers: [
     AppLoggerService,
+    RolesGuard,
     {
       provide: APP_FILTER,
       useClass: GlobalExceptionFilter,
@@ -17,6 +20,6 @@ import { AppLoggerService } from './services/index.js';
       useClass: ResponseInterceptor,
     },
   ],
-  exports: [AppLoggerService],
+  exports: [AppLoggerService, RolesGuard],
 })
 export class CommonModule {}

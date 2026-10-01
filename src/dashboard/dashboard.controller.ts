@@ -4,11 +4,18 @@ import {
   Query,
   UsePipes,
   ValidationPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { DashboardService } from './dashboard.service.js';
 import { RevenueQueryDto } from './dto/revenue-query.dto.js';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
+import { RolesGuard } from '../common/guards/roles.guard.js';
+import { Roles } from '../common/decorators/roles.decorator.js';
 
+// Protected: Requires valid JWT and ADMIN role
 @Controller(['api/dashboard', 'dashboard'])
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('ADMIN')
 export class DashboardController {
   constructor(private readonly dashboardService: DashboardService) {}
 

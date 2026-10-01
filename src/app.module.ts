@@ -13,10 +13,19 @@ import { PaymentsModule } from './payments/payments.module.js';
 import { NetworkModule } from './network/network.module.js';
 import { AuditModule } from './audit/audit.module.js';
 import { DashboardModule } from './dashboard/dashboard.module.js';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { AIModule } from './ai/ai.module.js';
 
 @Module({
   imports: [
     ScheduleModule.forRoot(),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 20,
+      },
+    ]),
     DrizzleModule,
     CommonModule,
     AuthModule,
@@ -28,8 +37,16 @@ import { DashboardModule } from './dashboard/dashboard.module.js';
     NetworkModule,
     AuditModule,
     DashboardModule,
+    AIModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}
+

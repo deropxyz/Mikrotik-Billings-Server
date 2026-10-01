@@ -8,11 +8,18 @@ import {
   Param,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { PackagesService } from './packages.service.js';
 import { CreatePackageDto, UpdatePackageDto } from './dto/index.js';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
+import { RolesGuard } from '../common/guards/roles.guard.js';
+import { Roles } from '../common/decorators/roles.decorator.js';
 
+// Protected: Requires valid JWT and ADMIN role
 @Controller('packages')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('ADMIN')
 export class PackagesController {
   constructor(private readonly packagesService: PackagesService) {}
 

@@ -19,6 +19,14 @@ export class AuditFilterDto {
   targetType?: string;
 
   @IsOptional()
+  @IsString()
+  targetId?: string;
+
+  @IsOptional()
+  @IsString()
+  source?: string;
+
+  @IsOptional()
   @IsDateString()
   dateFrom?: string;
 
